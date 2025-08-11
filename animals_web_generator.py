@@ -1,9 +1,14 @@
-import json
+import requests
 
-def load_data(file_path):
-  """ Loads a JSON file """
-  with open(file_path, "r") as handle:
-    return json.load(handle)
+def load_data_from_api(search_term):
+    """Fetches animal data from the API by search term"""
+    url = f"https://api.api-ninjas.com/v1/animals?name={search_term}"
+    headers = {
+        "X-Api-Key": "DpGC/76Z+Ph9KvW0QJXFKw==guAtztF6kLFBRhDs"  # <-- API-Key einfügen
+    }
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()
+    return response.json()
 
 def serialize_animal(animal_obj):
     """ Serializes an animal object """
@@ -26,48 +31,22 @@ def serialize_animal(animal_obj):
     output += "</ul></div></li>"
     return output
 
-def list_skin_types(animals):
-    skin_types = []
-    for animal in animals:
-        if animal.get("characteristics", {}).get("skin_type"):
-            skin_types.append(animal["characteristics"]["skin_type"].lower())
-    return set(skin_types)
-
-
 def main():
     """Main function"""
+    animals_data = load_data_from_api("Fox")
 
-    animals_data = load_data('animals_data.json')
+    # 2️⃣ HTML-Template laden
     with open("animals_template.html", encoding="utf-8") as f:
         html_file = f.read()
-    print("Choose a skin type.")
-    print("Available skin types:")
-    skins = (list_skin_types(animals_data))
-    for skin in skins:
-        print(f"{skin} ", end="")
-    while True:
-        user_choice = input("").lower()
-        if user_choice in skins:
-            user_animals = [
-                animal for animal in animals_data
-                if animal["characteristics"].get("skin_type").lower() == user_choice]
-            break
-        else:
-            print("Invalid choice")
-            continue
-    try:
-        output = ""
-        for animal in user_animals:
-            output += serialize_animal(animal)
 
-        new_html = html_file.replace("__REPLACE_ANIMALS_INFO__", output)
+    output = ""
+    for animal in animals_data:
+        output += serialize_animal(animal)
 
-        with open("animals.html", "w", encoding="utf-8") as output_file:
-            output_file.write(new_html)
+    new_html = html_file.replace("__REPLACE_ANIMALS_INFO__", output)
 
-
-    except FileNotFoundError:
-        print("File not found")
+    with open("animals.html", "w", encoding="utf-8") as output_file:
+        output_file.write(new_html)
 
 if __name__ == "__main__":
     main()
