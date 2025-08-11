@@ -4,7 +4,7 @@ def load_data_from_api(search_term):
     """Fetches animal data from the API by search term"""
     url = f"https://api.api-ninjas.com/v1/animals?name={search_term}"
     headers = {
-        "X-Api-Key": "DpGC/76Z+Ph9KvW0QJXFKw==guAtztF6kLFBRhDs"  # <-- API-Key einfügen
+        "X-Api-Key": "DEIN_API_KEY_HIER"  # <-- Deinen API-Key hier einfügen
     }
     response = requests.get(url, headers=headers)
     response.raise_for_status()
@@ -33,20 +33,33 @@ def serialize_animal(animal_obj):
 
 def main():
     """Main function"""
-    animals_data = load_data_from_api("Fox")
+    # 🐾 1. Tiernamen vom Benutzer abfragen
+    search_term = input("Enter a name of an animal: ").strip()
 
-    # 2️⃣ HTML-Template laden
+    # 🐾 2. Daten aus API laden
+    animals_data = load_data_from_api(search_term)
+
+    if not animals_data:
+        print(f"No results found for '{search_term}'.")
+        return
+
+    # 🐾 3. HTML-Template laden
     with open("animals_template.html", encoding="utf-8") as f:
         html_file = f.read()
 
+    # 🐾 4. Daten in HTML umwandeln
     output = ""
     for animal in animals_data:
         output += serialize_animal(animal)
 
+    # 🐾 5. HTML-Datei erzeugen
     new_html = html_file.replace("__REPLACE_ANIMALS_INFO__", output)
 
     with open("animals.html", "w", encoding="utf-8") as output_file:
         output_file.write(new_html)
+
+    # 🐾 6. Erfolgsmeldung
+    print("Website was successfully generated to the file animals.html.")
 
 if __name__ == "__main__":
     main()
