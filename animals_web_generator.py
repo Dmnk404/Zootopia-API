@@ -1,20 +1,4 @@
-import os
-import requests
-from dotenv import load_dotenv
-
-load_dotenv()
-API_KEY = os.getenv("API_KEY")
-
-def load_data_from_api(search_term):
-    """Fetches animal data from the API by search term"""
-    url = f"https://api.api-ninjas.com/v1/animals?name={search_term}"
-    headers = {
-        "X-Api-Key": API_KEY
-    }
-
-    response = requests.get(url, headers=headers)
-    response.raise_for_status()
-    return response.json()
+from data_fetcher import fetch_data
 
 def serialize_animal(animal_obj):
     """ Serializes an animal object """
@@ -41,7 +25,7 @@ def main():
     """Main function"""
     search_term = input("Enter a name of an animal: ").strip()
 
-    animals_data = load_data_from_api(search_term)
+    animals_data = fetch_data(search_term)
 
     if not animals_data:
         print(f"No results found for '{search_term}'.")
